@@ -226,10 +226,11 @@ def run_i18nspector(options, path):
             for s in child.communicate()
         )
         rc = child.poll()
+    assert isinstance(rc, int)
     if rc == 0:
         return stdout
     if rc < 0:
-        message = ['command was interrupted by signal {sig}'.format(sig=get_signal_name(-rc))]
+        message = ['command was interrupted by signal {sig}'.format(sig=get_signal_name(-rc))]  # pylint: disable=invalid-unary-operand-type
     else:
         message = ['command exited with status {rc}'.format(rc=rc)]
     message += ['']
@@ -273,9 +274,9 @@ def _mp_run_i18nspector(prog, options, path, queue):
         stderr += ''.join(
             traceback.format_exception(exctp, exc, tb)
         )
-        del tb
         queue.put([stdout, stderr])
         sys.exit(1)
+        raise  # hi, pydiatra!
     else:
         queue.put([stdout, stderr])
         sys.exit(0)
